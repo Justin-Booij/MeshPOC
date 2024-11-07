@@ -1,0 +1,328 @@
+
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+  
+  
+  
+  
+  
+  @link(
+  url: "https://the-guild.dev/graphql/mesh/spec/v1.0"
+  import: ["@transport", "@merge", "@source", "@extraSchemaDefinitionDirective", "@httpOperation", "@grpcMethod", "@grpcConnectivityState", "@grpcRootJson"]
+)
+{
+  query: Query
+  
+  
+}
+
+
+  directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+  directive @join__field(
+    graph: join__Graph
+    requires: join__FieldSet
+    provides: join__FieldSet
+    type: String
+    external: Boolean
+    override: String
+    usedOverridden: Boolean
+  ) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+  directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+  directive @join__implements(
+    graph: join__Graph!
+    interface: String!
+  ) repeatable on OBJECT | INTERFACE
+
+  directive @join__type(
+    graph: join__Graph!
+    key: join__FieldSet
+    extension: Boolean! = false
+    resolvable: Boolean! = true
+    isInterfaceObject: Boolean! = false
+  ) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+  directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+  scalar join__FieldSet
+
+
+  directive @link(
+    url: String
+    as: String
+    for: link__Purpose
+    import: [link__Import]
+  ) repeatable on SCHEMA
+
+  scalar link__Import
+
+  enum link__Purpose {
+    """
+    `SECURITY` features provide metadata necessary to securely resolve fields.
+    """
+    SECURITY
+
+    """
+    `EXECUTION` features provide metadata necessary for operation execution.
+    """
+    EXECUTION
+  }
+
+
+
+
+
+
+
+enum join__Graph {
+  LOCATIONS @join__graph(name: "Locations", url: "http://localhost:3001") 
+  PETS @join__graph(name: "Pets", url: "http://localhost:3000") 
+  STORES @join__graph(name: "Stores", url: "localhost:50051") 
+}
+
+directive @transport(
+  kind: String!
+  subgraph: String!
+  location: String!
+  headers: [[String]]
+  options: TransportOptions
+  queryStringOptions: ObjMap
+  queryParams: [[String]]
+) repeatable on SCHEMA
+
+directive @merge(
+  subgraph: String
+  argsExpr: String
+  keyArg: String
+  keyField: String
+  key: [String!]
+  additionalArgs: String
+) repeatable on FIELD_DEFINITION
+
+directive @source(name: String!, type: String, subgraph: String!)  repeatable on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | INTERFACE | UNION | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+directive @extraSchemaDefinitionDirective(directives: _DirectiveExtensions)  repeatable on OBJECT
+
+directive @httpOperation(
+  subgraph: String
+  path: String
+  operationSpecificHeaders: [[String]]
+  httpMethod: HTTPMethod
+  isBinary: Boolean
+  requestBaseBody: ObjMap
+  queryParamArgMap: ObjMap
+  queryStringOptionsByParam: ObjMap
+  jsonApiFields: Boolean
+  queryStringOptions: ObjMap
+) repeatable on FIELD_DEFINITION
+
+directive @grpcMethod(
+  subgraph: String
+  rootJsonName: String
+  objPath: String
+  methodName: String
+  responseStream: Boolean
+) repeatable on FIELD_DEFINITION
+
+directive @grpcConnectivityState(subgraph: String, rootJsonName: String, objPath: String)  repeatable on FIELD_DEFINITION
+
+directive @grpcRootJson(subgraph: String, name: String, rootJson: ObjMap, loadOptions: ObjMap)  repeatable on OBJECT
+
+scalar TransportOptions @join__type(graph: LOCATIONS)  @join__type(graph: STORES) 
+
+scalar _DirectiveExtensions @join__type(graph: LOCATIONS)  @join__type(graph: PETS)  @join__type(graph: STORES) 
+
+scalar ObjMap @join__type(graph: PETS)  @join__type(graph: STORES) 
+
+"""
+Request to get all pet stores
+"""
+scalar Empty_Input @source(name: "petstore__Empty_Input", subgraph: "Stores")  @join__type(graph: STORES)  @specifiedBy(
+  url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf"
+)
+
+type Query @extraSchemaDefinitionDirective(
+  directives: {transport: [{kind: "http", subgraph: "Locations", location: "http://localhost:3001", options: {}}]}
+) @extraSchemaDefinitionDirective(
+  directives: {transport: [{subgraph: "Pets", kind: "rest", location: "http://localhost:3000"}]}
+) @grpcRootJson(
+  subgraph: "Stores"
+  name: "Root0"
+  rootJson: "{\"options\":{\"syntax\":\"proto3\"},\"nested\":{\"petstore\":{\"nested\":{\"PetStore\":{\"fields\":{\"id\":{\"type\":\"int32\",\"id\":1,\"comment\":null},\"name\":{\"type\":\"string\",\"id\":2,\"comment\":null},\"location\":{\"type\":\"int32\",\"id\":3,\"comment\":null},\"petsForSale\":{\"rule\":\"repeated\",\"type\":\"int32\",\"id\":4,\"comment\":null}},\"comment\":\"Message for pet store information\"},\"Empty\":{\"fields\":{},\"comment\":\"Request to get all pet stores\"},\"PetStoreList\":{\"fields\":{\"petStores\":{\"rule\":\"repeated\",\"type\":\"PetStore\",\"id\":1,\"comment\":null}},\"comment\":\"Response with a list of pet stores\"},\"PetStoreService\":{\"methods\":{\"GetAllPetStores\":{\"requestType\":\"Empty\",\"responseType\":\"PetStoreList\",\"comment\":null},\"GetPetStorePets\":{\"requestType\":\"PetStore\",\"responseType\":\"PetStore\",\"comment\":null}},\"comment\":\"Service definition for pet store\"}}}}}"
+) @extraSchemaDefinitionDirective(
+  directives: {transport: [{subgraph: "Stores", kind: "grpc", location: "localhost:50051", options: {requestTimeout: 200000}}]}
+) @join__type(graph: LOCATIONS)  @join__type(graph: PETS)  @join__type(graph: STORES)  {
+  stad: [City] @source(name: "cities", type: "[City]", subgraph: "Locations")  @join__field(graph: LOCATIONS) 
+  city(id: ID!) : City @merge(subgraph: "Locations", keyField: "id", keyArg: "id")  @join__field(graph: LOCATIONS) 
+  """
+  Get all pets
+  """
+  getAllPets: getAllPets_200_response @httpOperation(
+    subgraph: "Pets"
+    path: "/pets"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+  ) @join__field(graph: PETS) 
+  """
+  Get pets by breed
+  """
+  getPetsByBreed("""
+  The breed of the pets to filter by
+  """
+  breed: String!) : getPetsByBreed_200_response @httpOperation(
+    subgraph: "Pets"
+    path: "/pets/breed/{args.breed}"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+  ) @join__field(graph: PETS) 
+  """
+  Get a list of all pet breeds
+  """
+  getAllBreeds: getAllBreeds_200_response @httpOperation(
+    subgraph: "Pets"
+    path: "/breeds"
+    operationSpecificHeaders: [["accept", "application/json"]]
+    httpMethod: GET
+  ) @join__field(graph: PETS) 
+  GetAllPetStores(
+    input: Empty_Input @source(name: "input", type: "petstore__Empty_Input", subgraph: "Stores") 
+  ): PetStoreList @grpcMethod(
+    subgraph: "Stores"
+    rootJsonName: "Root0"
+    objPath: "petstore.PetStoreService"
+    methodName: "GetAllPetStores"
+    responseStream: false
+  ) @source(
+    name: "petstore_PetStoreService_GetAllPetStores"
+    type: "petstore__PetStoreList"
+    subgraph: "Stores"
+  ) @join__field(graph: STORES) 
+  GetPetStorePets(
+    input: PetStore_Input @source(name: "input", type: "petstore__PetStore_Input", subgraph: "Stores") 
+  ): PetStore @grpcMethod(
+    subgraph: "Stores"
+    rootJsonName: "Root0"
+    objPath: "petstore.PetStoreService"
+    methodName: "GetPetStorePets"
+    responseStream: false
+  ) @source(
+    name: "petstore_PetStoreService_GetPetStorePets"
+    type: "petstore__PetStore"
+    subgraph: "Stores"
+  ) @join__field(graph: STORES) 
+  connectivityState(tryToConnect: Boolean) : ConnectivityState @grpcConnectivityState(
+    subgraph: "Stores"
+    rootJsonName: "Root0"
+    objPath: "petstore.PetStoreService"
+  ) @source(
+    name: "petstore_PetStoreService_connectivityState"
+    type: "ConnectivityState"
+    subgraph: "Stores"
+  ) @join__field(graph: STORES) 
+}
+
+type City @join__type(graph: LOCATIONS, key: "id")  {
+  id: ID
+  name: String
+}
+
+type getAllPets_200_response @join__type(graph: PETS)  {
+  pets: [Pet]
+}
+
+type Pet @join__type(graph: PETS)  {
+  """
+  The unique identifier for a pet
+  """
+  id: Int
+  """
+  The name of the pet
+  """
+  name: String
+  """
+  The breed of the pet
+  """
+  breed: String
+  """
+  The age of the pet
+  """
+  age: Int
+  """
+  The weight of the pet in kilograms
+  """
+  weight: Float
+  """
+  A description of the pet
+  """
+  description: String
+}
+
+type getPetsByBreed_200_response @join__type(graph: PETS)  {
+  pets: [Pet]
+}
+
+type getAllBreeds_200_response @join__type(graph: PETS)  {
+  breeds: [Breed]
+}
+
+type Breed @join__type(graph: PETS)  {
+  """
+  The unique identifier for a breed
+  """
+  id: Int
+  """
+  The name of the breed
+  """
+  name: String
+}
+
+"""
+Response with a list of pet stores
+"""
+type PetStoreList @source(name: "petstore__PetStoreList", subgraph: "Stores")  @join__type(graph: STORES)  {
+  petStores: [PetStore] @source(name: "petStores", type: "[petstore__PetStore]", subgraph: "Stores") 
+}
+
+"""
+Message for pet store information
+"""
+type PetStore @source(name: "petstore__PetStore", subgraph: "Stores")  @join__type(graph: STORES)  {
+  id: Int
+  name: String
+  location: Int
+  petsForSale: [Int]
+}
+
+enum HTTPMethod @join__type(graph: PETS)  {
+  GET @join__enumValue(graph: PETS) 
+  HEAD @join__enumValue(graph: PETS) 
+  POST @join__enumValue(graph: PETS) 
+  PUT @join__enumValue(graph: PETS) 
+  DELETE @join__enumValue(graph: PETS) 
+  CONNECT @join__enumValue(graph: PETS) 
+  OPTIONS @join__enumValue(graph: PETS) 
+  TRACE @join__enumValue(graph: PETS) 
+  PATCH @join__enumValue(graph: PETS) 
+}
+
+enum ConnectivityState @join__type(graph: STORES)  {
+  IDLE @join__enumValue(graph: STORES) 
+  CONNECTING @join__enumValue(graph: STORES) 
+  READY @join__enumValue(graph: STORES) 
+  TRANSIENT_FAILURE @join__enumValue(graph: STORES) 
+  SHUTDOWN @join__enumValue(graph: STORES) 
+}
+
+"""
+Message for pet store information
+"""
+input PetStore_Input @source(name: "petstore__PetStore_Input", subgraph: "Stores")  @join__type(graph: STORES)  {
+  id: Int
+  name: String
+  location: Int
+  petsForSale: [Int]
+}
+    

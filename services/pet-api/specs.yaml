@@ -1,0 +1,110 @@
+openapi: 3.0.0
+info:
+  title: Pets API
+  description: API for managing pets and their breeds.
+  version: 1.0.0
+servers:
+  - url: "http://localhost:3000"
+    description: Local development server
+
+paths:
+  /pets:
+    get:
+      summary: Get all pets
+      operationId: getAllPets
+      tags:
+        - Pets
+      responses:
+        "200":
+          description: A list of all pets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pets:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Pet"
+
+  /pets/breed/{breed}:
+    get:
+      summary: Get pets by breed
+      operationId: getPetsByBreed
+      tags:
+        - Pets
+      parameters:
+        - name: breed
+          in: path
+          description: The breed of the pets to filter by
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of pets filtered by breed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pets:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Pet"
+        "404":
+          description: Breed not found
+
+  /breeds:
+    get:
+      summary: Get a list of all pet breeds
+      operationId: getAllBreeds
+      tags:
+        - Breeds
+      responses:
+        "200":
+          description: A list of all pet breeds
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  breeds:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Breed"
+
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier for a pet
+        name:
+          type: string
+          description: The name of the pet
+        breed:
+          type: string
+          description: The breed of the pet
+        age:
+          type: integer
+          description: The age of the pet
+        weight:
+          type: number
+          format: float
+          description: The weight of the pet in kilograms
+        description:
+          type: string
+          description: A description of the pet
+
+    Breed:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier for a breed
+        name:
+          type: string
+          description: The name of the breed
